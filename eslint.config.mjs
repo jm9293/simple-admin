@@ -14,7 +14,6 @@ const eslintConfig = [
   {
     rules: {
       // 코드 품질
-      'no-unused-vars': 'warn', // 사용하지 않는 변수 경고
       'no-console': 'warn', // console.log 사용 경고
       'no-debugger': 'warn', // debugger 사용 경고
       'no-duplicate-imports': 'error', // 중복 import 금지
@@ -37,7 +36,7 @@ const eslintConfig = [
       '@typescript-eslint/explicit-function-return-type': 'off', // 반환 타입 명시 강제하지 않음
       '@typescript-eslint/no-explicit-any': 'warn', // any 타입 사용 경고
       '@typescript-eslint/no-unused-vars': 'warn', // TS 미사용 변수 경고
-      '@typescript-eslint/ban-ts-comment': 'warn', // @ts-ignore 등 사용 경고
+      '@typescript-eslint/ban-ts-comment': 'warn', // @ts_ignore 등 사용 경고
     },
   },
   eslintConfigPrettier,

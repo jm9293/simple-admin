@@ -2,15 +2,14 @@
 
 import { getProxyUserList } from '@/api/client/users';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Form/Input';
 import { Pagination } from '@/components/ui/Pagination';
 import { Table, TableColumn } from '@/components/ui/Table';
 import { Tag } from '@/components/ui/Tag';
 import { User, UserListParams } from '@/types/user';
-import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActiveType, SearchType } from '../page';
+import { ActiveType, SearchType } from '../../../app/users/page';
+import { UserSearchField } from '../UserSearchField';
 
 interface UserListFilter {
   page: number;
@@ -36,9 +35,9 @@ export default function UserList({ initialData }: UserListProps) {
   const [searchText, setSearchText] = useState(initialData.filter.searchText || '');
   const [activeType, setActiveType] = useState(initialData.filter.activeType);
   const [searchType, setSearchType] = useState<SearchType>(initialData.filter.searchType);
-  const [isLoading, setIsLoading] = useState(false);
   const isInitialRender = useRef(true);
   const router = useRouter();
+
   // 쿼리스트링 업데이트 함수
   const updateQueryString = useCallback(() => {
     const url = new URL(window.location.href);
@@ -69,7 +68,6 @@ export default function UserList({ initialData }: UserListProps) {
 
   // 사용자 데이터 가져오기
   const fetchUsers = useCallback(async () => {
-    setIsLoading(true);
     try {
       const filter: UserListParams = {
         page_index: page,
@@ -100,10 +98,26 @@ export default function UserList({ initialData }: UserListProps) {
       updateQueryString();
     } catch {
       alert('사용자 목록을 불러오는 중 오류가 발생했습니다:');
-    } finally {
-      setIsLoading(false);
     }
   }, [page, pageSize, activeType, searchType, updateQueryString, searchText]);
+
+  // 검색어 변경 핸들러
+  const handleSearchTextChange = useCallback((value: string) => {
+    setSearchText(value);
+    setPage(1); // 검색어 변경 시 첫 페이지로 이동
+  }, []);
+
+  // 검색 타입 변경 핸들러
+  const handleSearchTypeChange = useCallback((type: SearchType) => {
+    setSearchType(type);
+    setPage(1); // 검색 타입 변경 시 첫 페이지로 이동
+  }, []);
+
+  // 활성 상태 변경 핸들러
+  const handleActiveTypeChange = useCallback((type: ActiveType) => {
+    setActiveType(type);
+    setPage(1); // 활성 상태 변경 시 첫 페이지로 이동
+  }, []);
 
   // 테이블 컬럼 정의
   const columns: TableColumn<User>[] = useMemo(() => {
@@ -187,46 +201,19 @@ export default function UserList({ initialData }: UserListProps) {
 
     // 이후 Filter 상태가 변경될 때 API 호출
     fetchUsers();
-  }, [fetchUsers, updateQueryString]);
+  }, [fetchUsers, updateQueryString, searchText]);
 
   return (
     <>
       <div className="mb-4">
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <select
-            name="active"
-            value={activeType}
-            className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            onChange={(e) => {
-              setActiveType(e.target.value as ActiveType);
-              setPage(1);
-            }}
-          >
-            <option value={ActiveType.ALL}>모든 상태</option>
-            <option value={ActiveType.ACTIVE}>활성</option>
-            <option value={ActiveType.INACTIVE}>비활성</option>
-          </select>
-          <select
-            name="searchType"
-            value={searchType}
-            className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            onChange={(e) => {
-              setSearchType(e.target.value as SearchType);
-              setPage(1);
-            }}
-          >
-            <option value={SearchType.NAME}>이름</option>
-            <option value={SearchType.EMAIL}>이메일</option>
-            <option value={SearchType.ID}>ID</option>
-          </select>
-          <Input
-            name="searchText"
-            placeholder="이름, 이메일로 검색"
-            value={searchText}
-            prefixIcon={<Search />}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </div>
+        <UserSearchField
+          searchText={searchText}
+          searchType={searchType}
+          activeType={activeType}
+          onSearchTextChange={handleSearchTextChange}
+          onSearchTypeChange={handleSearchTypeChange}
+          onActiveTypeChange={handleActiveTypeChange}
+        />
       </div>
 
       {/* 테이블 영역 */}

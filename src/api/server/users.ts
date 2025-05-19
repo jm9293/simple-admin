@@ -4,7 +4,7 @@ import type {
   UserListParams,
   UserListResponse,
   UserUpdateParams,
-} from '../../types/user';
+} from '@/types/user';
 import { del, get, post } from './api-client';
 
 /**

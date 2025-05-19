@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { ComponentProps, forwardRef } from 'react';
+import { ComponentProps, forwardRef, useEffect, useState } from 'react';
 
-export interface InputProps extends Omit<ComponentProps<'input'>, 'size'> {
+export interface TextFieldProps extends Omit<ComponentProps<'input'>, 'size'> {
   /**
    * 입력 필드의 라벨을 지정합니다.
    */
@@ -35,9 +35,17 @@ export interface InputProps extends Omit<ComponentProps<'input'>, 'size'> {
    * 라벨 위치를 지정합니다.
    */
   labelPosition?: 'top' | 'left';
+  /**
+   * 로딩 상태를 지정합니다.
+   */
+  isLoading?: boolean;
+  /**
+   * 입력 필드의 초기 값을 지정합니다.
+   */
+  initialValue?: string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
+export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
   (
     {
       label,
@@ -50,10 +58,32 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       suffixIcon,
       labelPosition = 'top',
       disabled,
+      isLoading = false,
+      initialValue,
+      value,
+      onChange,
       ...props
     },
     ref
   ) => {
+    // initialValue와 외부 값 동기화를 위한 내부 상태
+    const [internalValue, setInternalValue] = useState(initialValue || value || '');
+
+    // 외부 value prop이 변경될 때 내부 상태 업데이트
+    useEffect(() => {
+      if (value !== undefined) {
+        setInternalValue(value as string);
+      }
+    }, [value]);
+
+    // 내부 상태 변경 핸들러
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInternalValue(e.target.value);
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
     const inputVariants = cva(
       'block rounded-md border bg-white transition-colors w-auto focus:outline-none focus:ring-1',
       {
@@ -121,6 +151,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       lg: 'w-5 h-5',
     };
 
+    // 높이 클래스
+    const heightClasses = {
+      sm: 'h-8',
+      md: 'h-10',
+      lg: 'h-12',
+    };
+
+    // 로딩 스켈레톤 컴포넌트
+    const LoadingSkeleton = () => (
+      <div className={cn('w-full animate-pulse rounded bg-gray-200', heightClasses[size])}></div>
+    );
+
     // 입력 필드 기본 클래스
     const inputBaseClasses = cn(
       inputVariants({ status, size, disabled, prefixIcon: !!prefixIcon, suffixIcon: !!suffixIcon }),
@@ -144,28 +186,41 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         <div className="relative flex-grow">
-          {prefixIcon && (
-            <div
-              className={cn(
-                'absolute top-1/2 left-2 flex -translate-y-1/2 items-center justify-center text-gray-400',
-                iconSizeClasses[size]
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              {prefixIcon && (
+                <div
+                  className={cn(
+                    'absolute top-1/2 left-2 flex -translate-y-1/2 items-center justify-center text-gray-400',
+                    iconSizeClasses[size]
+                  )}
+                >
+                  {prefixIcon}
+                </div>
               )}
-            >
-              {prefixIcon}
-            </div>
-          )}
 
-          <input ref={ref} disabled={disabled} className={inputBaseClasses} {...props} />
+              <input
+                ref={ref}
+                disabled={disabled}
+                className={inputBaseClasses}
+                value={internalValue}
+                onChange={handleChange}
+                {...props}
+              />
 
-          {suffixIcon && (
-            <div
-              className={cn(
-                'absolute top-1/2 right-2 flex -translate-y-1/2 items-center justify-center text-gray-400',
-                iconSizeClasses[size]
+              {suffixIcon && (
+                <div
+                  className={cn(
+                    'absolute top-1/2 right-2 flex -translate-y-1/2 items-center justify-center text-gray-400',
+                    iconSizeClasses[size]
+                  )}
+                >
+                  {suffixIcon}
+                </div>
               )}
-            >
-              {suffixIcon}
-            </div>
+            </>
           )}
         </div>
 
@@ -179,4 +234,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+TextField.displayName = 'TextField';

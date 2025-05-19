@@ -1,14 +1,15 @@
-/**
- * API 클라이언트 설정
- *
- * API 요청을 위한 기본 설정과 유틸리티 함수를 정의합니다.
- */
-
 // 환경 변수에서 API 키와 인증 키를 가져옵니다.
-// 실제 환경에서는 .env 파일이나 환경 변수를 통해 설정해야 합니다.
+// 실제 환경에서는 .env.local 파일이나 환경 변수를 통해 설정해야 합니다.
+// http://localhost:3001/api 은 Mock 서버입니다.
 
 const AUTH_KEY = process.env.FABRICATE_AUTH_KEY || 'auth_key';
-const BASE_URL = process.env.FABRICATE_BASE_URL || `http://localhost:3001/api`;
+const API_KEY = process.env.FABRICATE_API_KEY || 'api_key';
+
+// .env.local에 키가 없다면 Mock 서버를 바라보도록
+const BASE_URL =
+  (API_KEY != 'api_key' &&
+    `https://fabricate.mockaroo.com/api/v1/workspaces/danal/databases/${API_KEY}/api`) ||
+  `http://localhost:3001/api`;
 
 // API 요청 옵션 타입
 type RequestOptions = {
@@ -16,6 +17,17 @@ type RequestOptions = {
   headers?: Record<string, string>;
   body?: unknown;
 };
+
+// API 에러 클래스
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
 
 /**
  * API 요청 함수
@@ -45,23 +57,36 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions): 
 
     // 응답이 성공적이지 않은 경우 에러 처리
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `API 요청 실패: ${response.status}`);
+      const status = response.status;
+      let errorMessage = `API 요청 실패: ${status}`;
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // JSON 파싱 실패 시 기본 에러 메시지 사용
+      }
+
+      throw new ApiError(errorMessage, status);
     }
 
     // 응답 데이터 반환
     return (await response.json()) as T;
   } catch (error) {
-    throw error;
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError((error as Error).message, 500);
   }
 }
 
 /**
- * GET 요청 헬퍼 함수
+ * GET 요청
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
   // URL 파라미터 구성
+
   const queryParams = params
     ? '?' +
       new URLSearchParams(
@@ -77,14 +102,14 @@ export function get<T>(endpoint: string, params?: Record<string, any>): Promise<
 }
 
 /**
- * POST 요청 헬퍼 함수
+ * POST 요청
  */
 export function post<T>(endpoint: string, data: unknown): Promise<T> {
   return apiRequest<T>(endpoint, { method: 'POST', body: data });
 }
 
 /**
- * DELETE 요청 헬퍼 함수
+ * DELETE 요청
  */
 export function del<T>(endpoint: string): Promise<T> {
   return apiRequest<T>(endpoint, { method: 'DELETE' });

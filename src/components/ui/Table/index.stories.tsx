@@ -20,7 +20,6 @@ const sampleData: SampleData[] = [
   { id: 5, name: '정서연', email: 'jung@example.com', role: '사용자', status: '비활성' },
 ];
 
-// 타입을 명시적으로 지정한 메타 데이터
 const meta = {
   title: 'Components/UI/Table',
   component: Table,

@@ -1,11 +1,11 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { Mail, Search } from 'lucide-react';
-import { Input } from '.';
-import { PasswordInput } from './PasswordInput';
+import { PasswordInput } from './PasswordTextField';
+import { TextField } from './TextField';
 
 const meta = {
-  title: 'Components/ui/Form/Input',
-  component: Input,
+  title: 'Components/ui/TextField',
+  component: TextField,
   tags: ['autodocs'],
   argTypes: {
     status: {
@@ -21,10 +21,10 @@ const meta = {
       options: ['top', 'left'],
     },
   },
-} satisfies Meta<typeof Input>;
+} satisfies Meta<typeof TextField>;
 
 export default meta;
-type Story = StoryObj<typeof Input>;
+type Story = StoryObj<typeof TextField>;
 type PasswordStory = StoryObj<typeof PasswordInput>;
 
 export const Default: Story = {
@@ -147,7 +147,7 @@ export const LabelLeft: Story = {
   },
 };
 
-// PasswordInput 스토리
+// Password 스토리
 export const Password: PasswordStory = {
   render: (args) => <PasswordInput {...args} />,
   args: {

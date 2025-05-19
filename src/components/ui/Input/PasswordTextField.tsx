@@ -3,13 +3,13 @@
 
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Input, InputProps } from '.';
+import { InputProps, TextField } from './TextField';
 
 export function PasswordInput(props: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <Input
+    <TextField
       type={showPassword ? 'text' : 'password'}
       suffixIcon={
         <div onClick={() => setShowPassword(!showPassword)} className="cursor-pointer">

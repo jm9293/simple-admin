@@ -1,6 +1,6 @@
 import { getUserList } from '@/api/server/users';
+import UserTable from '@/components/users/UserTable/UserTable';
 import { UserListParams } from '@/types/user';
-import UserTable from './components/UserTable';
 
 export enum SearchType {
   NAME = 'NAME',
@@ -28,8 +28,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   const params = await Promise.resolve(searchParams);
 
   // URL 파라미터에서 페이지 정보 가져오기
-  const page = params.page ? parseInt(params.page, 10) : 1;
-  const pageSize = params.pageSize ? parseInt(params.pageSize, 10) : 10;
+  const page = params.page ? parseInt(params.page) : 1;
+  const pageSize = params.pageSize ? parseInt(params.pageSize) : 10;
   const activeType = params.activeType || ActiveType.ALL;
   const searchText = params.searchText || '';
   const searchType = params.searchType || SearchType.NAME;

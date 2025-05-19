@@ -48,7 +48,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: 'bg-blue-600 text-white hover:bg-blue-700',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+        secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-200',
         error: 'bg-red-600 text-white hover:bg-red-700',
         success: 'bg-green-600 text-white hover:bg-green-700',
         warning: 'bg-yellow-600 text-white hover:bg-yellow-700',

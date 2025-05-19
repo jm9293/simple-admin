@@ -19,14 +19,11 @@ export async function GET(request: NextRequest) {
       active: searchParams.has('active') ? searchParams.get('active') === 'true' : undefined,
     };
 
-    console.log(params);
-
     // 사용자 목록 조회 API 호출
     const data = await getUserList(params);
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('사용자 목록 조회 중 오류 발생:', error);
+  } catch {
     return NextResponse.json(
       { error: '사용자 목록을 불러오는 중 오류가 발생했습니다.' },
       { status: 500 }
